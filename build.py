@@ -90,11 +90,23 @@ def build_index():
 
     char_items = []
     for c in C.CHARACTERS:
-        char_items.append(
-            '    <li class="char">'
-            '<div class="char-text"><strong>%s.</strong> %s</div></li>'
-            % (e(c["name"]), e(c["desc"]))
-        )
+        if c.get("img"):
+            art = (
+                '<figure class="char-art"><img src="img/%s" alt="%s" loading="lazy">'
+                "<figcaption>%s</figcaption></figure>"
+                % (e(c["img"]), e(c["name"]), e(c.get("credit", "")))
+            )
+            char_items.append(
+                '    <li class="char has-art">%s'
+                '<div class="char-text"><strong>%s.</strong> %s</div></li>'
+                % (art, e(c["name"]), e(c["desc"]))
+            )
+        else:
+            char_items.append(
+                '    <li class="char">'
+                '<div class="char-text"><strong>%s.</strong> %s</div></li>'
+                % (e(c["name"]), e(c["desc"]))
+            )
     chars = "\n".join(char_items)
     themes = "\n".join(
         "    <li><strong>%s.</strong> %s</li>" % (e(name), e(desc))
@@ -130,6 +142,15 @@ def build_song(s):
     n = s["n"]
     moments = "\n".join("    <li>%s</li>" % e(mm) for mm in s["moments"])
 
+    art_html = ""
+    if s.get("img"):
+        art_html = (
+            '  <figure class="art">\n'
+            '    <img src="img/%s" alt="%s" loading="lazy">\n'
+            "    <figcaption>%s</figcaption>\n"
+            "  </figure>\n"
+        ) % (e(s["img"]), e(s["title"]), e(s.get("credit", "")))
+
     prev_link = (
         '<a class="nav-prev" href="%s">← Песнь %d</a>' % (song_href(n - 1), n - 1)
         if n > 1
@@ -146,6 +167,7 @@ def build_song(s):
         '<article class="song">\n'
         '  <p class="song-eyebrow">Песнь %d из %d</p>\n'
         "  <h1>%s</h1>\n"
+        "%s"
         '  <dl class="song-meta">\n'
         "    <dt>Где</dt><dd>%s</dd>\n"
         "    <dt>Кто</dt><dd>%s</dd>\n"
@@ -162,6 +184,7 @@ def build_song(s):
         n,
         TOTAL,
         e(s["title"]),
+        art_html,
         e(s["where"]),
         e(s["who"]),
         e(s["summary"]),
